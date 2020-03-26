@@ -1,6 +1,6 @@
 public enum Cell
 {
-  EMPTY(0.0f, 255, 255, 255), QUARTER(0.25f, 0, 0, 255), HALF(0.5f, 0, 0, 255), FULL(1.0f, 0, 0, 255), BLOCK(0.0f, 0, 0, 0);
+  EMPTY(0.0f, 255, 255, 255), QUARTER(0.25f, 0, 0, 255), HALF(0.5f, 0, 0, 255), FULL(1.0f, 0, 0, 255), BLOCK(1.0f, 0, 0, 0);
   
   private final float waterLevel;
   private final int r;
