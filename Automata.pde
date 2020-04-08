@@ -4,20 +4,20 @@
 
 public class Automata
 {
-  int cellSize;
-  int cellAmountX;
-  int cellAmountY;
+  int cellSize; // size of a cell
+  int cellAmountX; // max amount of cell in x
+  int cellAmountY; // max amount of cell in y
   
-  float maxMass = 1.0; //The normal, un-pressurized mass of a full liquid cell
-  float maxCompress = 0.02; //How much excess liquid a cell can store, compared to the cell above it
-  float minMass = 0.0001; //Ignore cells that are almost dry
+  float maxMass; //The normal, un-pressurized mass of a full liquid cell
+  float maxCompress; //How much excess liquid a cell can store, compared to the cell above it
+  float minMass; //Ignore cells that are almost dry
   
-  Cell[][] cells;
+  Cell[][] cells; // matrix storing the states of the n generation
 
-  float [][] cellsMass;
+  float [][] cellsMass; // matrix storing the mass of the n generation
   
   boolean useNormalGravity = true;
-  float animStep = 0.5f;
+  float animStep = 0.5f; // smoothing factor of the liquid's transfert rate
   
   Automata(int cellSize, float maxMass, float maxCompression, float minMass, float animStep)
   {
@@ -38,7 +38,7 @@ public class Automata
     
   }
   
-  void initSim()
+  private void initSim()
   {
     for (int i = 0; i < cellAmountY; i++)
     {
@@ -49,7 +49,7 @@ public class Automata
     }
   }
   
-  void draw()
+  public void draw()
   {
     for (int i = 0; i < cellAmountY; i++)
     {
@@ -65,7 +65,7 @@ public class Automata
     }
   }
   
-  void updateAutomaton()
+  public void updateAutomaton()
   {
     //copying the actual masses of the automaton
     float[][] copiedMass = new float[cellsMass.length][];
@@ -203,7 +203,23 @@ public class Automata
    updateStates();
   }
   
-  void updateStates()
+  //Returns the amount of water that should be in the bottom cell.
+  //To tweak to have a different liquid behavior
+  float getStableState(float totalMass)
+  {
+    if ( totalMass <= 1 )
+    {
+      return 1;
+    } 
+    else if(totalMass < 2 * maxMass + maxCompress) //lower should get MaxMass + (upper_cell / MaxMass) * MaxCompress
+    {
+      return (maxMass * maxMass + totalMass * maxCompress) / (maxMass + maxCompress);
+    } 
+  
+    return (totalMass + maxCompress) / 2; // the lower should get upper + MaxCompress
+  }
+  
+  private void updateStates()
   {
     for(int x = 0; x < cellAmountX; ++x)
     {
@@ -211,20 +227,30 @@ public class Automata
        {
           if(cells[x][y] != Cell.BLOCK)
           {
-            cells[x][y] = cellsMass[x][y] > MinMass ? Cell.LIQUID : Cell.EMPTY;
+            cells[x][y] = cellsMass[x][y] > minMass ? Cell.LIQUID : Cell.EMPTY;
           }
        }
     }
   }
   
-   public void setCell(Cell c, int x, int y)
+   public void setCell(Cell c, int windowPosX, int windowPosY)
    {
-      cells[x][y] = c; 
+     int x = windowPosX / cellsSize;
+     int y = windowPosY / cellsSize;
+     
+      //out of bound checking
+      if (x >= 0 && x < cellAmountX && y >= 0 && y < cellAmountY)
+        cells[x][y] = c; 
    }
    
-   public void setCellMass(float mass, int x, int y)
+   public void setCellMass(float mass, int windowPosX, int windowPosY)
    {
-      cellsMass[x][y] = mass; 
+     int x = windowPosX / cellsSize;
+     int y = windowPosY / cellsSize;
+     
+      //out of bound checking
+      if (x >= 0 && x < cellAmountX && y >= 0 && y < cellAmountY)
+        cellsMass[x][y] = mass; 
    }
    
    public void toggleGravity()

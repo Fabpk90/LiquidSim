@@ -1,41 +1,28 @@
 int cellsSize = 5; //must be a divisor of the window's size (r must be 0)
 
+Automata a;
 
 void setup()
 {
   size(400, 400);
   frameRate(60.0f);
   
-  
+  a = new Automata(cellsSize, 1.0f, 0.02f, 0.0001f, 0.5f);
 }
 
 void draw()
 {
   background(255);
+  
+  a.updateAutomaton();
+  a.draw();
 }
 
-
-
-//Returns the amount of water that should be in the bottom cell.
-//To tweak to have a different liquid behavior
-float getStableState(float total_mass)
-{
-  if ( total_mass <= 1 )
-  {
-    return 1;
-  } 
-  else if(total_mass < 2 * MaxMass + MaxCompress) //lower should get MaxMass + (upper_cell / MaxMass) * MaxCompress
-  {
-    return (MaxMass*MaxMass + total_mass * MaxCompress) / (MaxMass + MaxCompress);
-  } 
-
-  return (total_mass + MaxCompress) / 2; // the lower should get upper + MaxCompress
-}
 
 void keyPressed()
 {
   if(key == 'g')
-    useNormalGravity = !useNormalGravity;
+     a.toggleGravity();
 }
 
 void mouseClicked()
@@ -50,25 +37,16 @@ void mouseDragged()
 
 void handleMouse()
 {
-  int positionX = mouseX / cellsSize;
-  int positionY = mouseY / cellsSize;
-
-  //out of bound checking
-  if (positionX >= 0 && positionX < cellAmountX
-    && positionY >= 0 && positionY < cellAmountY)
+  if (mouseButton == LEFT)
   {
-    //TODO: make sure the cell can be placed
-    if (mouseButton == LEFT)
-    {
-      cells[positionX][positionY] = Cell.BLOCK;
-      cellsMass[positionX][positionY] = 1.0f;
-    }
-    else if (mouseButton == RIGHT)
-    {
-      cellsMass[positionX][positionY] = 1.0f; 
-      cells[positionX][positionY] = Cell.LIQUID;
-    }
-    else if (mouseButton == CENTER)
-      cells[positionX][positionY] = Cell.EMPTY;
+    a.setCell(Cell.BLOCK, mouseX, mouseY);
+    a.setCellMass(1.0f, mouseX, mouseY);
   }
+  else if (mouseButton == RIGHT)
+  {
+    a.setCell(Cell.LIQUID, mouseX, mouseY);
+    a.setCellMass(1.0f, mouseX, mouseY);
+  }
+  else if (mouseButton == CENTER)
+    a.setCell(Cell.EMPTY, mouseX, mouseY);
 }
